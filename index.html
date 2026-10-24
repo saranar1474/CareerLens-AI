@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4f46e5"><meta name="description" content="Career Lens: free resume analyzer. Get a job-readiness score, skill gaps, bullet rewrites and a 4-week plan. Private, runs in your browser."><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png"><title>Career Lens – AI Resume Analyzer</title>
+<style>
+:root{--bg:#f5f6fb;--card:#fff;--tx:#12151f;--mut:#5b6377;--bd:#e2e5ef;--pri:#4f46e5;--pri2:#7c3aed;--ok:#16a34a;--warn:#d97706;--bad:#dc2626;--chip:#eef0fb;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1118;--card:#171b26;--tx:#eef0f6;--mut:#9aa3b8;--bd:#272d3d;--pri:#818cf8;--pri2:#a78bfa;--chip:#222840;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1118;--card:#171b26;--tx:#eef0f6;--mut:#9aa3b8;--bd:#272d3d;--pri:#818cf8;--pri2:#a78bfa;--chip:#222840;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:linear-gradient(120deg,var(--pri),var(--pri2));color:#fff;padding:34px 20px 70px}
+.w{max-width:1040px;margin:0 auto}
+.logo{font-weight:800;letter-spacing:.3px;font-size:18px}
+h1{margin:14px 0 6px;font-size:clamp(26px,5vw,40px);line-height:1.15}
+header p{margin:0;opacity:.92;max-width:620px}
+main{margin-top:-46px;padding:0 16px 40px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 6px 24px rgba(20,20,60,.06)}
+h2{font-size:16px;margin:0 0 12px}
+label{font-weight:600;font-size:13px;color:var(--mut);display:block;margin:12px 0 6px}
+textarea,select{width:100%;border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:10px;padding:10px 12px;font:inherit}
+textarea{min-height:210px;resize:vertical}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+button,.btn{border:0;border-radius:10px;padding:10px 16px;font:600 14px inherit;font-family:inherit;cursor:pointer;background:var(--chip);color:var(--tx)}
+button.p{background:linear-gradient(120deg,var(--pri),var(--pri2));color:#fff;padding:12px 22px;font-size:15px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.hero{display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+.ring{position:relative;width:130px;height:130px}.ring svg{transform:rotate(-90deg)}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:34px}
+.lab{font-size:22px;font-weight:800}.delta{color:var(--ok);font-weight:700}
+.bar{margin:9px 0}.bar span{display:flex;justify-content:space-between;font-size:13px;color:var(--mut)}
+.bar i{display:block;height:8px;border-radius:8px;background:var(--bd);overflow:hidden;margin-top:4px}
+.bar i u{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,var(--pri),var(--pri2));transition:width .8s}
+.chip{display:inline-block;padding:4px 10px;border-radius:99px;font-size:13px;margin:3px 4px 3px 0;background:var(--chip)}
+.chip.ok{background:rgba(22,163,74,.15);color:var(--ok)}.chip.no{background:rgba(220,38,38,.12);color:var(--bad)}
+.fix{border-left:3px solid var(--warn);padding:6px 12px;margin:10px 0;background:var(--bg);border-radius:0 8px 8px 0}
+.fix small{color:var(--mut);display:block}.good{color:var(--ok);font-weight:600}
+ul{padding-left:20px;margin:6px 0}li{margin:5px 0}
+.wk{display:grid;gap:8px}.wk div{background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:10px 12px}
+.mut{color:var(--mut);font-size:13px}#out{display:none}
+</style></head><body>
+<header><div class="w"><div class="logo">◎ Career Lens</div>
+<h1>Know if your resume is job-ready in 10 seconds.</h1>
+<p>Upload your resume, pick a target role or paste a job description, and get a score, a skill-gap map, smarter bullet rewrites and a 4-week plan.</p></div></header>
+<main><div class="w">
+<div class="card"><div class="grid"><div>
+<h2>1 · Your resume</h2>
+<input type="file" id="file" accept=".pdf,.docx,.txt" style="display:none">
+<div class="row" style="margin-top:0"><button onclick="file.click()">⬆ Upload PDF / DOCX / TXT</button>
+<button onclick="sample(0)">Try weak sample</button><button onclick="sample(1)">Try improved sample</button></div>
+<label for="rt">…or paste resume text</label><textarea id="rt" placeholder="Paste your resume text here"></textarea>
+<div class="mut" id="st"></div></div><div>
+<h2>2 · Your target</h2>
+<label for="role">Target role</label><select id="role"></select>
+<label for="jd">Job description (optional, overrides role)</label>
+<textarea id="jd" style="min-height:150px" placeholder="Paste a job posting to see how well you match it"></textarea>
+<div class="row"><button class="p" onclick="run()">Analyze my resume →</button></div>
+<p class="mut">🔒 Everything runs in your browser. Your resume never leaves your device.</p></div></div></div>
+<div id="out"></div>
+</div></main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const rx=k=>new RegExp('(^|[^a-z0-9+#])'+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?![a-z0-9+#])','i');
+const ROLES={
+"Software Developer":["python","java","javascript","git","sql","api","react","node","docker","testing","algorithms","linux","aws","rest","html","css"],
+"Frontend Developer":["html","css","javascript","react","typescript","responsive","git","accessibility","api","figma","testing","tailwind"],
+"Data Analyst":["sql","excel","python","tableau","power bi","statistics","pandas","visualization","dashboard","etl","reporting","analysis"],
+"Digital Marketing":["seo","analytics","social media","content","campaign","google ads","email marketing","branding","copywriting","a/b testing","crm"]};
+Object.keys(ROLES).forEach(r=>$('role').add(new Option(r)));
+const VERBS=new Set("built developed designed led created implemented launched improved reduced increased optimized automated analyzed managed organized delivered engineered deployed integrated mentored coordinated achieved trained wrote configured tested resolved streamlined founded presented researched migrated architected secured".split(" "));
+const WEAK=/\b(worked on|responsible for|helped with|helped|involved in|assisted in|participated in|duties included)\b/i;
+const SW=new Set("the and for with you your our are will have has from that this who work team able must about into more such not can all any per use using years year experience skills ability strong good knowledge looking role job candidate responsibilities requirements preferred required including etc their they them been being were was than then also well new may should would could other which what when where how why".split(" "));
+const SAMPLES=[
+`Rohan Mehta
+Bengaluru
+Objective: Looking for a good job in IT company.
+Education
+B.E. Computer Science, 2026
+Projects
+- Worked on a website for college
+- Responsible for making a small app
+- Helped with a team project in Python
+Skills
+Python, HTML, teamwork, hard working`,
+`Rohan Mehta | rohan.mehta@email.com | +91 98765 43210 | linkedin.com/in/rohanmehta | github.com/rohanm
+Summary
+Final-year Computer Science student building full-stack web apps with JavaScript, React and Python.
+Education
+B.E. Computer Science, EPCET Bengaluru, 2026, CGPA 8.4
+Projects
+- Built a placement portal with React, Node and SQL API used by 300+ students
+- Reduced page load time by 40% by optimizing images and caching REST responses
+- Developed a Python script with git workflows that automated 5 hours of weekly reporting
+- Deployed the app on AWS using Docker and tested key flows with 25+ unit tests
+Experience
+- Led a 4-member team to deliver a hackathon prototype in 8 hours, winning 2nd place
+Skills
+Python, JavaScript, React, Node, SQL, Git, Docker, AWS, HTML, CSS, REST API, Linux, algorithms, testing
+Certifications
+AWS Cloud Practitioner`];
+let last=null;
+function sample(i){$('rt').value=SAMPLES[i];$('st').textContent='Sample loaded.';run()}
+$('file').onchange=async e=>{const f=e.target.files[0];if(!f)return;$('st').textContent='Reading '+f.name+'…';
+try{let t='';const n=f.name.toLowerCase(),b=await f.arrayBuffer();
+if(n.endsWith('.pdf')){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const pdf=await pdfjsLib.getDocument({data:b}).promise;for(let i=1;i<=pdf.numPages;i++){const c=await(await pdf.getPage(i)).getTextContent();t+=c.items.map(x=>x.str+(x.hasEOL?'\n':' ')).join('')+'\n'}}
+else if(n.endsWith('.docx'))t=(await mammoth.extractRawText({arrayBuffer:b})).value;
+else t=new TextDecoder().decode(b);
+if(t.trim().length<30)throw 0;$('rt').value=t;$('st').textContent='Loaded '+f.name+'.';run()}
+catch(x){$('st').textContent='Could not read that file. Please paste the text instead.'}};
+function jdKeys(j){const f={};(j.toLowerCase().match(/[a-z][a-z0-9+#.]{2,}/g)||[]).forEach(w=>{w=w.replace(/\.$/,'');if(!SW.has(w))f[w]=(f[w]||0)+1});return Object.entries(f).sort((a,b)=>b[1]-a[1]).slice(0,18).map(e=>e[0])}
+function analyze(t,kws){
+const words=t.split(/\s+/).filter(Boolean).length,lines=t.split('\n').map(s=>s.trim()).filter(Boolean);
+const bl=lines.filter(l=>l.split(/\s+/).length>=5).map(l=>l.replace(/^[•\-*▪●–\d.\s]+/,''));
+const verb=bl.filter(l=>VERBS.has(l.split(/\s+/)[0].toLowerCase())).length,num=bl.filter(l=>/\d+\s?%|\$\s?\d|\d{2,}|\d+\+/.test(l)).length;
+const hit=kws.filter(k=>rx(k).test(t)),miss=kws.filter(k=>!rx(k).test(t));
+const em=/[\w.+-]+@[\w-]+\.[\w.]+/.test(t),ph=/(\+?\d[\d\s-]{8,}\d)/.test(t),ln=/linkedin\.com|github\.com/i.test(t);
+const S={summary:/\b(summary|objective|profile|about)\b/i,education:/\beducation\b|b\.?\s?(tech|e)\b|bachelor|degree/i,experience:/\b(experience|internship|employment|work history)\b/i,projects:/\bprojects?\b/i,skills:/\bskills?\b|technologies/i};
+const sec=Object.keys(S).filter(k=>S[k].test(t)),secM=Object.keys(S).filter(k=>!S[k].test(t));
+const lenPts=words>=250&&words<=700?10:words>=120&&words<=900?6:words<60?1:3;
+const cat={
+"Contact & links":Math.round((em?4:0)+(ph?3:0)+(ln?3:0)),
+"Resume structure":sec.length*4,
+"Action verbs":Math.round(Math.min(1,bl.length?verb/bl.length/.6:0)*12),
+"Quantified impact":Math.round(Math.min(1,bl.length?num/bl.length/.4:0)*13),
+"Length":lenPts,
+"Keyword match":Math.round(kws.length?hit.length/kws.length*35:0)};
+const max={"Contact & links":10,"Resume structure":20,"Action verbs":12,"Quantified impact":13,"Length":10,"Keyword match":35};
+const score=Object.values(cat).reduce((a,b)=>a+b,0);
+const tips=[];
+if(!em)tips.push('Add a professional email address.');if(!ph)tips.push('Add a phone number.');if(!ln)tips.push('Link your LinkedIn or GitHub.');
+secM.forEach(s=>tips.push('Add a clear “'+s[0].toUpperCase()+s.slice(1)+'” section.'));
+if(cat["Quantified impact"]<9)tips.push('Add numbers to bullets (%, users, time saved, team size).');
+if(cat["Action verbs"]<8)tips.push('Start bullets with strong verbs like Built, Led, Reduced, Automated.');
+if(words<250)tips.push('Resume is short ('+words+' words). Aim for 250–700.');if(words>700)tips.push('Resume is long. Trim to the most relevant 1–2 pages.');
+const fixes=lines.filter(l=>WEAK.test(l)).slice(0,4).map(l=>{const c=l.replace(/^[•\-*▪●–\s]+/,'');return{o:c,n:c.replace(WEAK,'Developed').replace(/^./,m=>m.toUpperCase())+', achieving [add a result, e.g. “cutting load time by 30%”]'}});
+return{score,cat,max,hit,miss,tips,fixes,words};}
+function qs(a){const q=[];a.hit.slice(0,3).forEach(k=>q.push('Tell me about a project where you used '+k+'. What went wrong and how did you fix it?'));
+a.miss.slice(0,2).forEach(k=>q.push('Your resume doesn’t mention '+k+'. How would you get productive with it in two weeks?'));
+q.push('Walk me through your most impressive project and the measurable result.');return q}
+function plan(m){if(!m.length)return[['Week 1–4','You cover the core keywords. Polish projects, practise interviews and apply to 5 roles per week.']];
+const g=[m.slice(0,2),m.slice(2,4),m.slice(4,6)].filter(x=>x.length),o=[];
+g.forEach((x,i)=>o.push(['Week '+(i+1),'Learn the basics of '+x.join(' and ')+' (official docs, freeCodeCamp, YouTube) and build one small demo using it.']));
+o.push(['Week '+(g.length+1),'Add the new project and skills to your resume with quantified bullets, then apply.']);return o}
+function run(){const t=$('rt').value.trim();if(t.length<30){$('st').textContent='Please add your resume text first.';return}
+const jd=$('jd').value.trim(),kws=jd.length>40?jdKeys(jd):ROLES[$('role').value],a=analyze(t,kws);
+const lab=a.score<50?'Needs work':a.score<70?'Getting there':a.score<85?'Job-ready':'Standout';
+const d=last===null?'':(a.score-last>=0?'<div class="delta">▲ +'+(a.score-last)+' since last analysis</div>':'<div class="mut">'+(a.score-last)+' since last analysis</div>');last=a.score;
+const C=2*Math.PI*52;
+$('out').innerHTML=`<div class="card hero"><div class="ring"><svg width="130" height="130"><circle cx="65" cy="65" r="52" fill="none" stroke="var(--bd)" stroke-width="12"/><circle id="arc" cx="65" cy="65" r="52" fill="none" stroke="var(--pri)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C}" style="transition:stroke-dashoffset 1s"/></svg><b>${a.score}</b></div>
+<div><div class="mut">Job-readiness score</div><div class="lab">${lab}</div>${d}<div class="mut">${a.words} words · matched ${a.hit.length}/${a.hit.length+a.miss.length} target keywords${jd.length>40?' from your job description':' for '+esc($('role').value)}</div></div></div>
+<div class="grid"><div class="card"><h2>Score breakdown</h2>${Object.keys(a.cat).map(k=>`<div class="bar"><span>${k}<b>${a.cat[k]}/${a.max[k]}</b></span><i><u style="width:${a.cat[k]/a.max[k]*100}%"></u></i></div>`).join('')}</div>
+<div class="card"><h2>Skill-gap map</h2><div class="mut">Found</div>${a.hit.map(k=>'<span class="chip ok">✓ '+esc(k)+'</span>').join('')||'<span class="mut">None yet</span>'}<div class="mut" style="margin-top:10px">Missing</div>${a.miss.map(k=>'<span class="chip no">+ '+esc(k)+'</span>').join('')||'<span class="good">Nothing missing. Great coverage!</span>'}</div></div>
+<div class="grid"><div class="card"><h2>Top fixes</h2>${a.tips.length?'<ul>'+a.tips.map(x=>'<li>'+x+'</li>').join('')+'</ul>':'<div class="good">No major issues found. Nice work.</div>'}
+${a.fixes.length?'<h2 style="margin-top:16px">Bullet rewrites</h2>'+a.fixes.map(f=>'<div class="fix"><small>Before</small>'+esc(f.o)+'<small style="margin-top:6px">Suggested</small><b>'+esc(f.n)+'</b></div>').join(''):''}</div>
+<div class="card"><h2>Your 4-week roadmap</h2><div class="wk">${plan(a.miss).map(w=>'<div><b>'+w[0]+'</b><br>'+w[1]+'</div>').join('')}</div>
+<h2 style="margin-top:16px">Likely interview questions</h2><ul>${qs(a).map(x=>'<li>'+esc(x)+'</li>').join('')}</ul></div></div>`;
+$('out').style.display='block';$('out').scrollIntoView({behavior:'smooth'});
+setTimeout(()=>{const e=$('arc');if(e)e.style.strokeDashoffset=C*(1-a.score/100)},60)}
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script></body></html>
